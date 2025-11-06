@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 여행 플래너</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Loading Spinner -->
+        <div id="loadingSpinner" class="loading-overlay hidden">
+            <div class="loading-content">
+                <div class="loading-icon-wrapper">
+                    <i class="fas fa-map-marker-alt loading-icon-center"></i>
+                    <i class="fas fa-plane loading-icon-spin"></i>
+                    <i class="fas fa-sparkles loading-icon-sparkle1"></i>
+                    <i class="fas fa-sparkles loading-icon-sparkle2"></i>
+                </div>
+                <h2 class="loading-title">여행 계획 생성 중...</h2>
+                <div class="loading-steps">
+                    <div class="loading-step">
+                        <div class="loading-dot"></div>
+                        <p>최적의 경로를 찾고 있습니다</p>
+                    </div>
+                    <div class="loading-step">
+                        <div class="loading-dot"></div>
+                        <p>맛집과 관광지를 추천하고 있습니다</p>
+                    </div>
+                    <div class="loading-step">
+                        <div class="loading-dot"></div>
+                        <p>대중교통 연계를 확인하고 있습니다</p>
+                    </div>
+                </div>
+                <div class="spinner"></div>
+            </div>
+        </div>
+
+        <!-- Header -->
+        <header class="header">
+            <div class="header-icon">
+                <div class="icon-circle">
+                    <i class="fas fa-plane"></i>
+                </div>
+                <i class="fas fa-sparkles sparkle-icon"></i>
+            </div>
+            <h1 class="main-title">AI 여행 플래너</h1>
+            <p class="subtitle">당신만의 완벽한 여행을 설계해드립니다</p>
+            <div class="feature-tags">
+                <span class="tag tag-blue">실시간 경로</span>
+                <span class="tag tag-indigo">맞춤 추천</span>
+                <span class="tag tag-purple">대중교통 연계</span>
+            </div>
+        </header>
+
+        <!-- Progress Steps -->
+        <div id="progressSteps" class="progress-container">
+            <div class="progress-wrapper">
+                <div class="progress-step">
+                    <div class="step-circle active" id="step1Circle">1</div>
+                    <p class="step-label">여행 정보</p>
+                </div>
+                <div class="progress-line" id="progressLine"></div>
+                <div class="progress-step">
+                    <div class="step-circle" id="step2Circle">2</div>
+                    <p class="step-label">취향 선택</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <main id="mainContent">
+            <!-- Step 1: Trip Input Form -->
+            <div id="step1" class="step-content active">
+                <div class="card form-card">
+                    <div class="card-header">
+                        <div class="step-badge">1</div>
+                        <h2 class="card-title">여행 정보 입력</h2>
+                    </div>
+                    <form id="tripForm" class="form">
+                        <div class="form-group">
+                            <label class="label">
+                                <i class="fas fa-map-marker-alt icon-blue"></i>
+                                출발 건물/위치
+                            </label>
+                            <input
+                                type="text"
+                                id="departureAddress"
+                                class="input-field"
+                                placeholder="예: 서울역, 서울시 중구 세종대로 18"
+                                required
+                            >
+                            <p class="helper-text">정확한 주소 또는 건물명을 입력해주세요</p>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="label">
+                                <i class="fas fa-map-marker-alt icon-indigo"></i>
+                                도착 건물/위치
+                            </label>
+                            <input
+                                type="text"
+                                id="destinationAddress"
+                                class="input-field"
+                                placeholder="예: 해운대 해수욕장, 부산 해운대구"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label class="label">
+                                <i class="fas fa-clock icon-blue"></i>
+                                출발 시간
+                            </label>
+                            <input
+                                type="datetime-local"
+                                id="departureTime"
+                                class="input-field"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label class="label">
+                                <i class="fas fa-calendar icon-indigo"></i>
+                                여행 기간 (일)
+                            </label>
+                            <div class="slider-container">
+                                <input
+                                    type="range"
+                                    id="duration"
+                                    class="slider"
+                                    min="1"
+                                    max="14"
+                                    value="1"
+                                >
+                                <div class="duration-badge" id="durationBadge">1일</div>
+                            </div>
+                            <div class="slider-labels">
+                                <span>당일치기</span>
+                                <span>2주</span>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">다음 단계로</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Step 2: Preferences Form -->
+            <div id="step2" class="step-content">
+                <div class="card form-card-large">
+                    <div class="card-header">
+                        <div class="step-badge">2</div>
+                        <h2 class="card-title">취향 선택</h2>
+                    </div>
+                    <form id="preferencesForm" class="form">
+                        <!-- Interests -->
+                        <div class="form-group">
+                            <label class="label">
+                                <i class="fas fa-heart icon-red"></i>
+                                관심사 (최소 1개 선택)
+                            </label>
+                            <div class="grid grid-3">
+                                <button type="button" class="option-btn" data-interest="nature">
+                                    <i class="fas fa-mountain"></i>
+                                    <span>자연/풍경</span>
+                                </button>
+                                <button type="button" class="option-btn" data-interest="culture">
+                                    <i class="fas fa-palette"></i>
+                                    <span>문화/역사</span>
+                                </button>
+                                <button type="button" class="option-btn" data-interest="food">
+                                    <i class="fas fa-utensils"></i>
+                                    <span>맛집 탐방</span>
+                                </button>
+                                <button type="button" class="option-btn" data-interest="photo">
+                                    <i class="fas fa-camera"></i>
+                                    <span>사진 명소</span>
+                                </button>
+                                <button type="button" class="option-btn" data-interest="shopping">
+                                    <i class="fas fa-shopping-bag"></i>
+                                    <span>쇼핑</span>
+                                </button>
+                                <button type="button" class="option-btn" data-interest="nightlife">
+                                    <i class="fas fa-music"></i>
+                                    <span>나이트라이프</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Food Preferences -->
+                        <div class="form-group">
+                            <label class="label">
+                                <i class="fas fa-utensils icon-orange"></i>
+                                음식 취향 (최소 1개 선택)
+                            </label>
+                            <div class="grid grid-3">
+                                <button type="button" class="option-btn" data-food="korean">한식</button>
+                                <button type="button" class="option-btn" data-food="western">양식</button>
+                                <button type="button" class="option-btn" data-food="japanese">일식</button>
+                                <button type="button" class="option-btn" data-food="chinese">중식</button>
+                                <button type="button" class="option-btn" data-food="cafe">카페/디저트</button>
+                                <button type="button" class="option-btn" data-food="street">길거리 음식</button>
+                            </div>
+                        </div>
+
+                        <!-- Budget -->
+                        <div class="form-group">
+                            <label class="label">
+                                <i class="fas fa-dollar-sign icon-green"></i>
+                                예산
+                            </label>
+                            <div class="grid grid-3">
+                                <button type="button" class="option-btn" data-budget="low">저렴하게</button>
+                                <button type="button" class="option-btn" data-budget="medium">적당하게</button>
+                                <button type="button" class="option-btn" data-budget="high">럭셔리하게</button>
+                            </div>
+                        </div>
+
+                        <!-- Pace -->
+                        <div class="form-group">
+                            <label class="label">
+                                <i class="fas fa-bolt icon-yellow"></i>
+                                여행 스타일
+                            </label>
+                            <div class="grid grid-3">
+                                <button type="button" class="option-btn" data-pace="relaxed">느긋하게</button>
+                                <button type="button" class="option-btn" data-pace="moderate">적당하게</button>
+                                <button type="button" class="option-btn" data-pace="packed">알차게</button>
+                            </div>
+                        </div>
+
+                        <div class="button-group">
+                            <button type="button" class="btn btn-secondary" id="backBtn">이전</button>
+                            <button type="submit" class="btn btn-primary" id="generateBtn">여행 계획 생성</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Step 3: Travel Plan Result -->
+            <div id="step3" class="step-content">
+                <!-- Success Banner -->
+                <div class="success-banner">
+                    <div class="success-content">
+                        <i class="fas fa-check-circle success-icon"></i>
+                        <div>
+                            <h2 class="success-title">여행 계획이 완성되었습니다!</h2>
+                            <p class="success-subtitle">완벽한 <span id="totalDaysResult">0</span>일 여행을 즐기세요</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Overview Cards -->
+                <div class="overview-grid">
+                    <div class="overview-card card-blue">
+                        <div class="overview-content">
+                            <p class="overview-label">총 여행 기간</p>
+                            <p class="overview-value"><span id="overviewDays">0</span>일</p>
+                        </div>
+                        <i class="fas fa-calendar overview-icon"></i>
+                    </div>
+                    <div class="overview-card card-green">
+                        <div class="overview-content">
+                            <p class="overview-label">예상 총 비용</p>
+                            <p class="overview-value">₩<span id="overviewCost">0</span></p>
+                        </div>
+                        <i class="fas fa-dollar-sign overview-icon"></i>
+                    </div>
+                    <div class="overview-card card-purple">
+                        <div class="overview-content">
+                            <p class="overview-label">총 이동 거리</p>
+                            <p class="overview-value"><span id="overviewDistance">0</span>km</p>
+                        </div>
+                        <i class="fas fa-map-marker-alt overview-icon"></i>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <button class="btn btn-outline" id="downloadBtn">
+                        <i class="fas fa-download"></i>
+                        <span>일정 다운로드</span>
+                    </button>
+                    <button class="btn btn-outline" id="shareBtn">
+                        <i class="fas fa-share-alt"></i>
+                        <span>공유하기</span>
+                    </button>
+                    <button class="btn btn-outline" id="resetBtn">
+                        <i class="fas fa-redo"></i>
+                        <span>새로운 계획</span>
+                    </button>
+                </div>
+
+                <!-- Itinerary -->
+                <div id="itineraryContainer"></div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>© 2025 AI Travel Planner. 완벽한 여행의 시작.</p>
+            <p class="footer-subtitle">실시간 대중교통 정보 • Google Maps 연동 • AI 맞춤 추천</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
